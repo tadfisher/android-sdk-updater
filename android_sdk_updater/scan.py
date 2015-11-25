@@ -3,7 +3,7 @@
 import os
 import sys
 import jprops
-import semantic_version
+from semantic_version import Version
 
 from android_sdk_updater.package import Package
 
@@ -78,7 +78,7 @@ def parse(top, root):
     if not name:
         print("Package parse failed:", path, file=sys.stderr)
         return None
-    return Package(parts[0], name, props['revision'])
+    return Package(parts[0], name, props['revision'], Version.coerce(props['revision']))
 
 
 def parse_properties(file):
@@ -90,7 +90,7 @@ def parse_properties(file):
             elif key == 'Pkg.LicenseRef':
                 props['license'] = value
             elif key == 'Pkg.Revision':
-                props['revision'] = semantic_version.Version.coerce(value)
+                props['revision'] = value
             elif key == 'SystemImage.Abi':
                 props['abi'] = value
             elif key == 'SystemImage.TagId':
@@ -105,7 +105,7 @@ def scan(top):
             del subdirs[:]
             package = parse(top, root)
             if package:
-                packages += [package]
+                packages.append(package)
     return packages
 
 

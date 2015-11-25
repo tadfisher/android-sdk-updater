@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 
+import os
 import re
 import sys
 import subprocess
-import semantic_version
+
+from semantic_version import Version
+
 from android_sdk_updater.package import Package
 
 categories = {
@@ -19,7 +22,8 @@ categories = {
     'Tool': 'tools'
 }
 
-def list(android):
+
+def list_packages(android):
     packages = []
     separator = '----------'
     out = subprocess.getoutput(android + ' list sdk --all --extended')
@@ -38,7 +42,8 @@ def list(android):
             print("Failed to parse revision:", field, file=sys.stderr)
             continue
         revision, *rest = m.groups()
-        revision = semantic_version.Version.coerce(revision.replace(' (Obsolete)', ''))
+        revision = revision.replace(' (Obsolete)', '')
+        semver = Version.coerce(revision)
 
         m = p_type.search(field)
         if m is None:
@@ -49,12 +54,12 @@ def list(android):
         if category is None:
             print("Unrecognized type:", ptype, file=sys.stderr)
             category = ptype.lower()
-        packages += [Package(category, name, revision, num)]
+        packages.append(Package(category, name, revision, semver, num))
     return packages
 
 
 def main(android):
-    packages = list(android)
+    packages = list_packages(android)
     for p in packages:
         print(p)
 
