@@ -5,7 +5,7 @@ import sys
 import jprops
 from semantic_version import Version
 
-from android_sdk_updater.package import Package
+from updater.package import Package
 
 
 def add_ons(props, parts):

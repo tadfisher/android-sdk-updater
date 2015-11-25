@@ -5,8 +5,8 @@ import sys
 
 import pexpect
 
-from android_sdk_updater.scan import scan
-from android_sdk_updater.list import list_packages
+from updater.scan import scan
+from updater.list import list_packages
 
 
 class Update:
@@ -66,8 +66,10 @@ def combine_updates(requests, updates):
     return nums
 
 
-def main(args):
-    sdk, *req = args
+def main(sdk, req=None):
+    if req is None:
+        req = []
+
     android = os.path.join(sdk, 'tools', 'android')
 
     print('Scanning', sdk, 'for installed packages...')

@@ -7,7 +7,7 @@ import subprocess
 
 from semantic_version import Version
 
-from android_sdk_updater.package import Package
+from updater.package import Package
 
 categories = {
     'Addon': 'add-ons',
