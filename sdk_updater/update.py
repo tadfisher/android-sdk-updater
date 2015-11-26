@@ -46,7 +46,7 @@ def compute_requests(requested, available):
     for r in requested:
         a = ad.get(r)
         if a is None:
-            print('   Update site is missing package \'{:s}!\''.format(r), file=sys.stderr)
+            print('    Update site is missing package \'{:s}\''.format(r), file=sys.stderr)
             continue
         requests.append(a)
     return requests
@@ -54,10 +54,11 @@ def compute_requests(requested, available):
 
 def remove_packages(packages, requested):
     pd = to_dict(packages)
+    diff = set()
     for r in requested:
-        if r in pd:
-            requested.remove(r)
-
+        if r not in pd:
+            diff.add(r)
+    return diff
 
 def combine_updates(requests, updates):
     nums = set()
@@ -82,14 +83,15 @@ def main(sdk, bootstrap=None, verbose=False, timeout=None, dry_run=False):
     print('   ', str(len(installed)), 'packages installed.')
 
     # Remove package names we already have
-    if len(bootstrap) > 0:
-        remove_packages(installed, bootstrap)
+    requested = []
+    if bootstrap:
+        requested = remove_packages(installed, bootstrap)
 
     print('Querying update sites for available packages...')
     available = list_packages(android, verbose=verbose)
     print('   ', str(len(available)), 'packages available.')
 
-    requests = compute_requests(bootstrap, available)
+    requests = compute_requests(requested, available)
     updates = compute_updates(installed, available)
 
     for r in requests:
