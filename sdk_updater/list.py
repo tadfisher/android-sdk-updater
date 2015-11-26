@@ -28,7 +28,7 @@ categories = {
 def list_packages(android):
     packages = []
     separator = '----------'
-    out = subprocess.getoutput(android + ' list sdk --all --extended')
+    out = subprocess.check_output([android, 'list', 'sdk', '--all', '--extended'])
     fields = out.split(separator)[1:]
     p_id = re.compile('^id: (\d+) or "(.+)"$', flags=re.MULTILINE)
     p_revision = re.compile('[Rr]evision (.+)')
