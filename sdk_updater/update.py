@@ -77,6 +77,9 @@ def main(sdk, bootstrap=None, verbose=False, timeout=None, dry_run=False):
         timeout = None
 
     android = os.path.join(sdk, 'tools', 'android')
+    if not os.path.isfile(android):
+        print('{:s} not found. Is ANDROID_HOME correct?'.format(android))
+        exit(1)
 
     print('Scanning', sdk, 'for installed packages...')
     installed = scan(sdk, verbose=verbose)
