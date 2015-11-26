@@ -17,12 +17,14 @@ def main():
             help='the path to your Android SDK')
     parser.add_argument('--version', action='version',
             version='%(prog)s {v}'.format(v=__version__))
+    parser.add_argument('-b', '--bootstrap', nargs='*', metavar='PACKAGE',
+            help='package names to install if not already installed')
 
     # Get our arguments
     args = parser.parse_args()
 
     # Find the Android SDK
-    android_home = os.environ['ANDROID_HOME']
+    android_home = os.environ.get('ANDROID_HOME')
 
     if args.android_home:
         android_home = args.android_home
@@ -30,8 +32,11 @@ def main():
     if not android_home:
         parser.error('Please set --android-home or export $ANDROID_HOME in your environment')
 
+    # Collect package names
+    packages = args.bootstrap
+
     # Run the updater
-    update_sdk.main(android_home)
+    update_sdk.main(android_home, packages)
     
 
 if __name__ == '__main__':

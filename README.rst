@@ -2,7 +2,7 @@ android-sdk-updater
 ===================
 
 A tool for keeping Android dependencies up-to-date in an unattended environment. Pass it your :code:`$ANDROID_HOME` and let it
-update everything in-place. Optionally, provide a list of package names (from :code:`android list sdk --all`) and bootstrap
+update everything in-place. Optionally, provide a list of package names (from :code:`android list sdk --all`) to bootstrap
 your environment.
 
 This tool is especially useful for continuous-integration environments.
@@ -26,7 +26,7 @@ Usage
 
 ::
 
-    android-sdk-updater <sdk-root> [<package> ...]
+    android-sdk-updater --android-home=ANDROID-HOME --boostrap [PACKAGE ...]
 
 License
 -------
