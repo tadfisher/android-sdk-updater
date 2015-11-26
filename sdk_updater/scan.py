@@ -63,7 +63,7 @@ def default(props, parts):
 
 
 def parse(top, root):
-    path = root[len(top):]
+    path = os.path.relpath(root, top)
     parts = path.split(os.path.sep)
     props = parse_properties(os.path.join(root, 'source.properties'))
     name = {
