@@ -1,0 +1,41 @@
+#!/usr/bin/python
+
+import os
+import sys
+import argparse
+
+from sdk_updater import __version__
+from sdk_updater import update as update_sdk
+
+def main():
+    # Create our parser
+    parser = argparse.ArgumentParser(prog='android-sdk-updater',
+            description='Update and Android SDK install')
+
+    # Set up our command-line arguments
+    parser.add_argument('--android-home',
+            help='the path to your Android SDK')
+    parser.add_argument('--version', action='version',
+            version='%(prog)s {v}'.format(v=__version__))
+
+    # Get our arguments
+    args = parser.parse_args()
+
+    # Find the Android SDK
+    android_home = os.environ['ANDROID_HOME']
+
+    if args.android_home:
+        android_home = args.android_home
+
+    if not android_home:
+        parser.error('Please set --android-home or export $ANDROID_HOME in your environment')
+
+    # Run the updater
+    update_sdk.main(android_home)
+    
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        sys.exit()
