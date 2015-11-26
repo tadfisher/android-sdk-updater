@@ -101,7 +101,7 @@ def parse_properties(file):
     return props
 
 
-def scan(top):
+def scan(top, verbose=False):
     packages = []
     for root, subdirs, files in os.walk(top):
         if 'source.properties' in files:
@@ -109,6 +109,8 @@ def scan(top):
             package = parse(top, root)
             if package:
                 packages.append(package)
+                if verbose:
+                    print('Found package "{:s}" in {:s}'.format(str(package), root))
     return packages
 
 

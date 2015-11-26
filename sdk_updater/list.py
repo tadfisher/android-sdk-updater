@@ -25,10 +25,17 @@ categories = {
 }
 
 
-def list_packages(android):
+def list_packages(android, verbose=False):
     packages = []
     separator = '----------'
-    out = subprocess.check_output([android, 'list', 'sdk', '--all', '--extended'])
+
+    out = subprocess.check_output(
+        [android, 'list', 'sdk', '--all', '--extended'],
+        stderr=subprocess.PIPE)
+
+    if verbose:
+        print(out)
+
     fields = out.split(separator)[1:]
     p_id = re.compile('^id: (\d+) or "(.+)"$', flags=re.MULTILINE)
     p_revision = re.compile('[Rr]evision (.+)')

@@ -19,6 +19,8 @@ def main():
             version='%(prog)s {v}'.format(v=__version__))
     parser.add_argument('-b', '--bootstrap', nargs='*', metavar='PACKAGE',
             help='package names to install if not already installed')
+    parser.add_argument('-v', '--verbose', action='store_true',
+            help='show extra output from android tools')
 
     # Get our arguments
     args = parser.parse_args()
@@ -32,11 +34,8 @@ def main():
     if not android_home:
         parser.error('Please set --android-home or export $ANDROID_HOME in your environment')
 
-    # Collect package names
-    packages = args.bootstrap
-
     # Run the updater
-    update_sdk.main(android_home, packages)
+    update_sdk.main(android_home, bootstrap=args.bootstrap, verbose=args.verbose)
     
 
 if __name__ == '__main__':

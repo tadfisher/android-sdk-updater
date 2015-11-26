@@ -68,25 +68,25 @@ def combine_updates(requests, updates):
     return nums
 
 
-def main(sdk, req=None):
-    if req is None:
-        req = []
+def main(sdk, bootstrap=None, verbose=False):
+    if bootstrap is None:
+        bootstrap = []
 
     android = os.path.join(sdk, 'tools', 'android')
 
     print('Scanning', sdk, 'for installed packages...')
-    installed = scan(sdk)
+    installed = scan(sdk, verbose=verbose)
     print('   ', str(len(installed)), 'packages installed.')
 
-    # Remove requested package names we already have
-    if len(req) > 0:
-        remove_packages(installed, req)
+    # Remove package names we already have
+    if len(bootstrap) > 0:
+        remove_packages(installed, bootstrap)
 
     print('Querying update sites for available packages...')
-    available = list_packages(android)
+    available = list_packages(android, verbose=verbose)
     print('   ', str(len(available)), 'packages available.')
 
-    requests = compute_requests(req, available)
+    requests = compute_requests(bootstrap, available)
     updates = compute_updates(installed, available)
 
     for r in requests:
@@ -102,16 +102,19 @@ def main(sdk, req=None):
     package_filter = ','.join(nums)
 
     installer = pexpect.spawn('{:s} update sdk --no-ui --all --filter {:s}'.format(android, package_filter))
-    installer.logfile = sys.stdout.buffer
-    eof = False
-    while not eof:
+    if verbose:
+        if sys.version_info[0] == '3':
+          installer.logfile = sys.stdout.buffer
+        else:
+          installer.logfile = sys.stdout
+    while True:
         i = installer.expect([r"Do you accept the license '.+' \[y/n\]:", pexpect.EOF])
         if i == 0:
             installer.sendline('y')
         else:
-            eof = True
+            break
 
-    print('Done; installed {:d} packages.'.format(len(nums)))
+    print('Done; (should have) installed {:d} package(s).'.format(len(nums)))
 
 if __name__ == '__main__':
     main(sys.argv[1:])
