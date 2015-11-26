@@ -68,9 +68,12 @@ def combine_updates(requests, updates):
     return nums
 
 
-def main(sdk, bootstrap=None, verbose=False):
+def main(sdk, bootstrap=None, verbose=False, timeout=None):
     if bootstrap is None:
         bootstrap = []
+
+    if timeout == 0:
+        timeout = None
 
     android = os.path.join(sdk, 'tools', 'android')
 
@@ -101,20 +104,31 @@ def main(sdk, bootstrap=None, verbose=False):
 
     package_filter = ','.join(nums)
 
-    installer = pexpect.spawn('{:s} update sdk --no-ui --all --filter {:s}'.format(android, package_filter))
+    installer = pexpect.spawn(
+        '{:s} update sdk --no-ui --all --filter {:s}'.format(android, package_filter),
+        timeout=timeout)
     if verbose:
         if sys.version_info[0] == '3':
           installer.logfile = sys.stdout.buffer
         else:
           installer.logfile = sys.stdout
     while True:
-        i = installer.expect([r"Do you accept the license '.+' \[y/n\]:", pexpect.EOF])
+        i = installer.expect([r"Do you accept the license '.+' \[y/n\]:",
+                pexpect.TIMEOUT, pexpect.EOF])
         if i == 0:
+            # Prompt
             installer.sendline('y')
+        elif i == 1:
+            # Timeout
+            print(('Package installation timed out after {:d} seconds. '
+                   'Some packages may have been installed successfully.')
+                  .format(timeout), file=sys.stderr)
+            exit(1)
         else:
             break
 
     print('Done; (should have) installed {:d} package(s).'.format(len(nums)))
+    exit(0)
 
 if __name__ == '__main__':
     main(sys.argv[1:])

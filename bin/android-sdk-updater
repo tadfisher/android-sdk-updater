@@ -13,14 +13,17 @@ def main():
             description='Update an Android SDK installation')
 
     # Set up our command-line arguments
+    parser.add_argument('-v', '--version', action='version',
+            version='%(prog)s {v}'.format(v=__version__))
+    parser.add_argument('-vv', '--verbose', action='store_true',
+            help='show extra output from android tools')
+    parser.add_argument('-t', '--timeout', type=int, default=0,
+            help=('timeout in seconds for package installation, '
+                  'or 0 to wait indefinitely (default)'))
     parser.add_argument('--android-home',
             help='the path to your Android SDK')
-    parser.add_argument('--version', action='version',
-            version='%(prog)s {v}'.format(v=__version__))
-    parser.add_argument('-b', '--bootstrap', nargs='*', metavar='PACKAGE',
+    parser.add_argument('-b', '--bootstrap', nargs='+', metavar='PACKAGE',
             help='package names to install if not already installed')
-    parser.add_argument('-v', '--verbose', action='store_true',
-            help='show extra output from android tools')
 
     # Get our arguments
     args = parser.parse_args()
@@ -34,8 +37,11 @@ def main():
     if not android_home:
         parser.error('Please set --android-home or export $ANDROID_HOME in your environment')
 
+    if args.timeout < 0:
+        parser.error('Timeout must be a positive number of seconds')
+
     # Run the updater
-    update_sdk.main(android_home, bootstrap=args.bootstrap, verbose=args.verbose)
+    update_sdk.main(android_home, bootstrap=args.bootstrap, verbose=args.verbose, timeout=args.timeout)
     
 
 if __name__ == '__main__':
