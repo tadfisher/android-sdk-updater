@@ -3,29 +3,30 @@
 import os
 import sys
 import argparse
-
 from sdk_updater import __version__
 from sdk_updater import update as update_sdk
 
+
 def main():
     # Create our parser
-    parser = argparse.ArgumentParser(prog='android-sdk-updater',
-            description='Update an Android SDK installation')
+    parser = argparse.ArgumentParser(
+        prog='android-sdk-updater',
+        description='Update an Android SDK installation')
 
     # Set up our command-line arguments
     parser.add_argument('-v', '--version', action='version',
-            version='%(prog)s {v}'.format(v=__version__))
+                        version='%(prog)s {v}'.format(v=__version__))
     parser.add_argument('-vv', '--verbose', action='store_true',
-            help='show extra output from android tools')
+                        help='show extra output from android tools')
     parser.add_argument('-t', '--timeout', type=int, default=0,
-            help=('timeout in seconds for package installation, '
-                  'or 0 to wait indefinitely (default)'))
+                        help=('timeout in seconds for package installation, '
+                              'or 0 to wait indefinitely (default)'))
     parser.add_argument('-n', '--dry-run', action='store_true',
-            help='compute packages to install but do not install anything')
+                        help='compute packages to install but do not install anything')
     parser.add_argument('--android-home',
-            help='the path to your Android SDK')
+                        help='the path to your Android SDK')
     parser.add_argument('-b', '--bootstrap', nargs='+', metavar='PACKAGE',
-            help='package names to install if not already installed')
+                        help='package names to install if not already installed')
 
     # Get our arguments
     args = parser.parse_args()
@@ -48,7 +49,7 @@ def main():
                     verbose=args.verbose,
                     timeout=args.timeout,
                     dry_run=args.dry_run)
-    
+
 
 if __name__ == '__main__':
     try:

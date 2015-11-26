@@ -1,12 +1,9 @@
 #!/usr/bin/python
 
 from __future__ import print_function
-
 import os
 import sys
-
 import pexpect
-
 from sdk_updater.scan import scan
 from sdk_updater.list import list_packages
 
@@ -17,7 +14,7 @@ class Update:
         self.available = available
 
     def __str__(self):
-        return self.installed.name + " [" + self.installed.revision + " -> " + self.available.revision + "]"
+        return '{:s} [{:s} -> {:s}]'.format(self.installed.name, self.installed.revision, self.available.revision)
 
 
 def to_dict(packages):
@@ -33,7 +30,7 @@ def compute_updates(installed, available):
     for i in installed:
         a = ad.get(i.name)
         if a is None:
-            print('   Update site is missing package \'{:s}!\''.format(i.name), file=sys.stderr)
+            print('   Update site is missing package \'{:s}\''.format(i.name), file=sys.stderr)
             continue
         if a.semver > i.semver:
             updates.append(Update(i, a))
@@ -60,19 +57,20 @@ def remove_packages(packages, requested):
             diff.add(r)
     return diff
 
-def combine_updates(requests, updates):
-    nums = set()
-    for r in requests:
-        nums.add(r.num)
-    for u in updates:
-        nums.add(u.available.num)
-    return nums
+
+def scan_missing(sdk, packages, verbose=False):
+    # Re-scan SDK root to check for failed installs.
+    print('Re-scanning {:s}...'.format(sdk))
+    installed = scan(sdk, verbose=verbose)
+    missing = [p for p in packages if p not in installed]
+    if missing:
+        print('Failed to install packages:', file=sys.stderr)
+        for m in missing:
+            print('   ', m, file=sys.stderr)
+    return missing
 
 
 def main(sdk, bootstrap=None, verbose=False, timeout=None, dry_run=False):
-    if bootstrap is None:
-        bootstrap = []
-
     if timeout == 0:
         timeout = None
 
@@ -102,8 +100,9 @@ def main(sdk, bootstrap=None, verbose=False, timeout=None, dry_run=False):
     for u in updates:
         print('Updating:   {:s}'.format(str(u)))
 
-    nums = combine_updates(requests, updates)
-    if not nums:
+    to_install = set(requests + [u.available for u in updates])
+
+    if not to_install:
         print("All packages are up-to-date.")
         exit(0)
 
@@ -111,33 +110,39 @@ def main(sdk, bootstrap=None, verbose=False, timeout=None, dry_run=False):
         print("--dry-run was set; exiting.")
         exit(0)
 
-    package_filter = ','.join(nums)
+    package_filter = ','.join([p.name for p in to_install])
 
     installer = pexpect.spawn(
         '{:s} update sdk --no-ui --all --filter {:s}'.format(android, package_filter),
         timeout=timeout)
     if verbose:
         if sys.version_info[0] == '3':
-          installer.logfile = sys.stdout.buffer
+            installer.logfile = sys.stdout.buffer
         else:
-          installer.logfile = sys.stdout
+            installer.logfile = sys.stdout
     while True:
         i = installer.expect([r"Do you accept the license '.+' \[y/n\]:",
-                pexpect.TIMEOUT, pexpect.EOF])
+                              pexpect.TIMEOUT, pexpect.EOF])
         if i == 0:
             # Prompt
             installer.sendline('y')
         elif i == 1:
             # Timeout
-            print(('Package installation timed out after {:d} seconds. '
-                   'Some packages may have been installed successfully.')
+            print('Package installation timed out after {:d} seconds.'
                   .format(timeout), file=sys.stderr)
-            exit(1)
+            break
         else:
             break
 
-    print('Done; (should have) installed {:d} package(s).'.format(len(nums)))
-    exit(0)
+    # Re-scan SDK dir for packages we missed.
+    missing = scan_missing(sdk, to_install, verbose=verbose)
+
+    if missing:
+        print('Finished: {:d} packages installed. Failed to install {:d} packages.'
+              .format(len(to_install) - len(missing), len(missing)))
+    else:
+        print('Finished: {:d} packages installed.'.format(len(to_install)))
+
 
 if __name__ == '__main__':
     main(sys.argv[1:])

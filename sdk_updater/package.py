@@ -8,3 +8,16 @@ class Package:
 
     def __str__(self):
         return '{0.name} [{0.revision}]'.format(self)
+
+    def __eq__(self, other):
+        return self.name == other.name and self.semver == other.semver
+
+    def __ne__(self, other):
+        return not __eq__(other)
+
+    def __hash__(self):
+        const = 37
+        total = 13
+        total += self.name.__hash__() * total + const
+        total += self.semver.__hash__() * total + const
+        return total

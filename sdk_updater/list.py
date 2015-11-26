@@ -27,7 +27,7 @@ categories = {
 
 def list_packages(android, verbose=False):
     packages = []
-    separator = '----------'
+    separator = b'----------'
 
     out = subprocess.check_output(
         [android, 'list', 'sdk', '--all', '--extended'],
