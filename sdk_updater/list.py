@@ -1,4 +1,6 @@
-#!/usr/bin/env python3
+#!/usr/bin/python
+
+from __future__ import print_function
 
 import os
 import re
@@ -7,7 +9,7 @@ import subprocess
 
 from semantic_version import Version
 
-from updater.package import Package
+from sdk_updater.package import Package
 
 categories = {
     'Addon': 'add-ons',
@@ -26,7 +28,7 @@ categories = {
 def list_packages(android):
     packages = []
     separator = '----------'
-    out = subprocess.getoutput(android + ' list sdk --all --extended')
+    out = subprocess.check_output([android, 'list', 'sdk', '--all', '--extended'])
     fields = out.split(separator)[1:]
     p_id = re.compile('^id: (\d+) or "(.+)"$', flags=re.MULTILINE)
     p_revision = re.compile('[Rr]evision (.+)')
@@ -41,7 +43,7 @@ def list_packages(android):
         if m is None:
             print("Failed to parse revision:", field, file=sys.stderr)
             continue
-        revision, *rest = m.groups()
+        revision, _ = m.groups()
         revision = revision.replace(' (Obsolete)', '')
         semver = Version.coerce(revision)
 

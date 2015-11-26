@@ -1,12 +1,14 @@
-#!/usr/bin/env python3
+#!/usr/bin/python
+
+from __future__ import print_function
 
 import os
 import sys
 
 import pexpect
 
-from updater.scan import scan
-from updater.list import list_packages
+from sdk_updater.scan import scan
+from sdk_updater.list import list_packages
 
 
 class Update:

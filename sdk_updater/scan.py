@@ -1,11 +1,14 @@
-#!/usr/bin/env python3
+#!/usr/bin/python
+
+from __future__ import print_function
 
 import os
 import sys
 import jprops
+
 from semantic_version import Version
 
-from updater.package import Package
+from sdk_updater.package import Package
 
 
 def add_ons(props, parts):
