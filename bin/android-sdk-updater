@@ -20,6 +20,8 @@ def main():
     parser.add_argument('-t', '--timeout', type=int, default=0,
             help=('timeout in seconds for package installation, '
                   'or 0 to wait indefinitely (default)'))
+    parser.add_argument('-n', '--dry-run', action='store_true',
+            help='compute packages to install but do not install anything')
     parser.add_argument('--android-home',
             help='the path to your Android SDK')
     parser.add_argument('-b', '--bootstrap', nargs='+', metavar='PACKAGE',
@@ -41,7 +43,11 @@ def main():
         parser.error('Timeout must be a positive number of seconds')
 
     # Run the updater
-    update_sdk.main(android_home, bootstrap=args.bootstrap, verbose=args.verbose, timeout=args.timeout)
+    update_sdk.main(android_home,
+                    bootstrap=args.bootstrap,
+                    verbose=args.verbose,
+                    timeout=args.timeout,
+                    dry_run=args.dry_run)
     
 
 if __name__ == '__main__':

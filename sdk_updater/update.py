@@ -68,7 +68,7 @@ def combine_updates(requests, updates):
     return nums
 
 
-def main(sdk, bootstrap=None, verbose=False, timeout=None):
+def main(sdk, bootstrap=None, verbose=False, timeout=None, dry_run=False):
     if bootstrap is None:
         bootstrap = []
 
@@ -98,8 +98,12 @@ def main(sdk, bootstrap=None, verbose=False, timeout=None):
         print('Updating:   {:s}'.format(str(u)))
 
     nums = combine_updates(requests, updates)
-    if len(nums) == 0:
+    if not nums:
         print("All packages are up-to-date.")
+        exit(0)
+
+    if dry_run:
+        print("--dry-run was set; exiting.")
         exit(0)
 
     package_filter = ','.join(nums)
