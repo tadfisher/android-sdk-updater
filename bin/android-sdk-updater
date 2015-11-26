@@ -10,7 +10,7 @@ from sdk_updater import update as update_sdk
 def main():
     # Create our parser
     parser = argparse.ArgumentParser(prog='android-sdk-updater',
-            description='Update and Android SDK install')
+            description='Update an Android SDK installation')
 
     # Set up our command-line arguments
     parser.add_argument('--android-home',
