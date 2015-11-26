@@ -43,7 +43,7 @@ def list_packages(android):
         if m is None:
             print("Failed to parse revision:", field, file=sys.stderr)
             continue
-        revision, _ = m.groups()
+        revision, = m.groups()
         revision = revision.replace(' (Obsolete)', '')
         semver = Version.coerce(revision)
 
