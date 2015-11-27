@@ -1,6 +1,3 @@
-import sys
-import os
-
 try:
     from setuptools import setup
 except ImportError:
@@ -28,12 +25,14 @@ setup(
     scripts=['bin/android-sdk-updater'],
     zip_safe=False,
     classifiers=[
-        'Development Status :: 5 - Production/Stable',
+        'Development Status :: 3 - Alpha',
         'Environment :: Console',
-        'Environment :: Web Environment',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 3',
+        'Topic :: Software Development :: Build Tools'
     ]
 )
