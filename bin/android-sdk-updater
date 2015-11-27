@@ -21,13 +21,14 @@ def main():
                         version='%(prog)s {v}'.format(v=__version__))
     parser.add_argument('-a', '--android-home',
                         help='the path to your Android SDK')
-    parser.add_argument('-n', '--dry-run', action='store_true',
+    parser.add_argument('-d', '--dry-run', action='store_true',
                         help='compute packages to install but do not install anything')
     parser.add_argument('-t', '--timeout', type=int, default=0,
-                        help=('timeout in seconds for package installation, '
-                              'or 0 to wait indefinitely (default)'))
+                        help='timeout in seconds for package installation, or 0 to wait indefinitely (default)')
     parser.add_argument('-vv', '--verbose', action='store_true',
                         help='show extra output from android tools')
+    parser.add_argument('-o', '--options', nargs=argparse.REMAINDER,
+                        help='options to pass to the "android" tool; must be the final option specified')
     parser.add_argument('package', nargs='*',
                         help='name of SDK package to install if not already installed')
 
@@ -55,6 +56,7 @@ def main():
     # Run the updater
     update_sdk.main(android_home,
                     bootstrap=packages,
+                    options=args.options,
                     verbose=args.verbose,
                     timeout=args.timeout,
                     dry_run=args.dry_run)

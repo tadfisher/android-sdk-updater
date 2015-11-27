@@ -70,7 +70,32 @@ def scan_missing(sdk, packages, verbose=False):
     return missing
 
 
-def main(sdk, bootstrap=None, verbose=False, timeout=None, dry_run=False):
+def update_packages(android, package_filter, options=None, verbose=False, timeout=None):
+    if options is None:
+        options = []
+    args = ['update', 'sdk', '--no-ui', '--all', '--filter', package_filter] + options
+    installer = pexpect.spawn(android, args=args, timeout=timeout)
+    if verbose:
+        if sys.version_info >= (3,):
+            installer.logfile = sys.stdout.buffer
+        else:
+            installer.logfile = sys.stdout
+    while True:
+        i = installer.expect([r"Do you accept the license '.+' \[y/n\]:",
+                              pexpect.TIMEOUT, pexpect.EOF])
+        if i == 0:
+            # Prompt
+            installer.sendline('y')
+        elif i == 1:
+            # Timeout
+            print('Package installation timed out after {:d} seconds.'
+                  .format(timeout), file=sys.stderr)
+            break
+        else:
+            break
+
+
+def main(sdk, bootstrap=None, options=None, verbose=False, timeout=None, dry_run=False):
     if timeout == 0:
         timeout = None
 
@@ -89,7 +114,7 @@ def main(sdk, bootstrap=None, verbose=False, timeout=None, dry_run=False):
         requested = remove_packages(installed, bootstrap)
 
     print('Querying update sites for available packages...')
-    available = list_packages(android, verbose=verbose)
+    available = list_packages(android, options=options, verbose=verbose)
     print('   ', str(len(available)), 'packages available.')
 
     requests = compute_requests(requested, available)
@@ -111,28 +136,7 @@ def main(sdk, bootstrap=None, verbose=False, timeout=None, dry_run=False):
         exit(0)
 
     package_filter = ','.join([p.name for p in to_install])
-
-    installer = pexpect.spawn(
-        '{:s} update sdk --no-ui --all --filter {:s}'.format(android, package_filter),
-        timeout=timeout)
-    if verbose:
-        if sys.version_info >= (3,):
-            installer.logfile = sys.stdout.buffer
-        else:
-            installer.logfile = sys.stdout
-    while True:
-        i = installer.expect([r"Do you accept the license '.+' \[y/n\]:",
-                              pexpect.TIMEOUT, pexpect.EOF])
-        if i == 0:
-            # Prompt
-            installer.sendline('y')
-        elif i == 1:
-            # Timeout
-            print('Package installation timed out after {:d} seconds.'
-                  .format(timeout), file=sys.stderr)
-            break
-        else:
-            break
+    update_packages(android, package_filter, options, verbose, timeout)
 
     # Re-scan SDK dir for packages we missed.
     missing = scan_missing(sdk, to_install, verbose=verbose)
