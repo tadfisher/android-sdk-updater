@@ -2,9 +2,10 @@
 
 from __future__ import print_function
 
+import argparse
 import os
 import sys
-import argparse
+
 from sdk_updater import __version__
 from sdk_updater import update as update_sdk
 
@@ -45,11 +46,15 @@ def main():
     if args.timeout < 0:
         parser.error('Timeout must be a positive number of seconds')
 
-    print(args)
+    # Read packages from stdin
+    packages = list(args.package)
+    if not sys.stdin.isatty():
+        for line in sys.stdin:
+            packages.extend(line.split())
 
     # Run the updater
     update_sdk.main(android_home,
-                    bootstrap=args.package,
+                    bootstrap=packages,
                     verbose=args.verbose,
                     timeout=args.timeout,
                     dry_run=args.dry_run)
