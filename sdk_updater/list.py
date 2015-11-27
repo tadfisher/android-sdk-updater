@@ -25,12 +25,14 @@ categories = {
 }
 
 
-def list_packages(android, verbose=False):
+def list_packages(android, options=None, verbose=False):
+    if options is None:
+        options = []
     packages = []
     separator = '----------'
 
     out = subprocess.check_output(
-        [android, 'list', 'sdk', '--all', '--extended'],
+        [android, 'list', 'sdk', '--all', '--extended'] + options,
         stderr=subprocess.PIPE)
 
     out = out.decode()
