@@ -116,7 +116,7 @@ def main(sdk, bootstrap=None, verbose=False, timeout=None, dry_run=False):
         '{:s} update sdk --no-ui --all --filter {:s}'.format(android, package_filter),
         timeout=timeout)
     if verbose:
-        if sys.version_info[0] == '3':
+        if sys.version_info >= (3,):
             installer.logfile = sys.stdout.buffer
         else:
             installer.logfile = sys.stdout

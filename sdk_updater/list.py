@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
 from __future__ import print_function
+from __future__ import unicode_literals
 
-import os
 import re
 import sys
 import subprocess
@@ -27,11 +27,13 @@ categories = {
 
 def list_packages(android, verbose=False):
     packages = []
-    separator = b'----------'
+    separator = '----------'
 
     out = subprocess.check_output(
         [android, 'list', 'sdk', '--all', '--extended'],
         stderr=subprocess.PIPE)
+
+    out = out.decode()
 
     if verbose:
         print(out)
@@ -56,12 +58,12 @@ def list_packages(android, verbose=False):
 
         m = p_type.search(field)
         if m is None:
-            print("Failed to parse type:", field, file=sys.stderr)
+            print('Failed to parse type:', field, file=sys.stderr)
             continue
         ptype, = m.groups()
         category = categories[ptype]
         if category is None:
-            print("Unrecognized type:", ptype, file=sys.stderr)
+            print('Unrecognized type:', ptype, file=sys.stderr)
             category = ptype.lower()
         packages.append(Package(category, name, revision, semver, num))
     return packages
