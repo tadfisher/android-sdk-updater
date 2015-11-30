@@ -35,7 +35,7 @@ def list_packages(android, options=None, verbose=False):
         [android, 'list', 'sdk', '--all', '--extended'] + options,
         stderr=subprocess.PIPE)
 
-    out = out.decode()
+    out = out.decode('utf-8')
 
     if verbose:
         print(out)
