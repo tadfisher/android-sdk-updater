@@ -144,9 +144,10 @@ def main(sdk, bootstrap=None, options=None, verbose=False, timeout=None, dry_run
     if missing:
         print('Finished: {:d} packages installed. Failed to install {:d} packages.'
               .format(len(to_install) - len(missing), len(missing)))
+        exit(1)
     else:
         print('Finished: {:d} packages installed.'.format(len(to_install)))
-
+        exit(0)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
