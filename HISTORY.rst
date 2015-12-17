@@ -10,6 +10,7 @@ Change Log
 
 - Handle Unicode strings properly for Python 2.
 - Blacklist the NDK package. Plans are in place to support this in a future release.
+- Use non-zero exit code when installation of one or more packages fail.
 
 0.0.1 (2015-11-27)
 ++++++++++++++++++
