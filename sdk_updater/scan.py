@@ -11,6 +11,12 @@ from semantic_version import Version
 from sdk_updater.package import Package
 
 
+# TODO: Support NDK installs
+blacklist = [
+    'ndk-bundle'
+]
+
+
 def add_ons(props, parts):
     return parts[1]
 
@@ -64,6 +70,11 @@ def default(props, parts):
 
 def parse(top, root):
     path = os.path.relpath(root, top)
+
+    if path in blacklist:
+        print('Ignoring \'{:s}\' as it is blacklisted.'.format(path))
+        return None
+
     parts = path.split(os.path.sep)
     props = parse_properties(os.path.join(root, 'source.properties'))
     name = {
