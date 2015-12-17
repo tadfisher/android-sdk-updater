@@ -137,6 +137,16 @@ Same as the above, but through a proxy::
 
     $ cat packages.txt | android-sdk-updater -o --no-https --proxy-host example.com --proxy-port 3218
 
+Caveats
+-------
+
+The Android NDK is not supported. We plan to support installing and updating the NDK in a future release. In the
+meantime, you may see output that includes the following::
+
+    Ignoring 'ndk-bundle' as it is blacklisted.
+
+These warnings may be safely ignored.
+
 License
 -------
 

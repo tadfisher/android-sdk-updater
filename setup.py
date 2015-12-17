@@ -19,6 +19,7 @@ setup(
     keywords='android',
     license=open('LICENSE').read(),
     author='Tad Fisher',
+    author_email='tadfisher@gmail.com',
     url='https://github.com/tadfisher/android-sdk-updater',
     install_requires=requires,
     packages=['sdk_updater'],
