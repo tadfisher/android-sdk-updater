@@ -8,13 +8,30 @@ from sdk_updater.scan import scan
 from sdk_updater.list import list_packages
 
 
-class Update:
-    def __init__(self, installed, available):
-        self.installed = installed
-        self.available = available
+class PackageOperation(object):
+    def __init__(self, package):
+        self.package = package
+
+
+class Install(PackageOperation):
+    def __init__(self, package, revision):
+        super(Install, self).__init__(package)
+        self.revision = revision
 
     def __str__(self):
-        return '{:s} [{:s} -> {:s}]'.format(self.installed.name, self.installed.revision, self.available.revision)
+        return 'Installing: {:s} [{:s}]'\
+            .format(self.package.name, self.revision)
+
+
+class Update(PackageOperation):
+    def __init__(self, package, revision_installed, revision_available):
+        super(Update, self).__init__(package)
+        self.revision_installed = revision_installed
+        self.revision_available = revision_available
+
+    def __str__(self):
+        return 'Updating: {:s} [{:s} -> {:s}]'\
+            .format(self.package.name, self.revision_installed, self.revision_available)
 
 
 def to_dict(packages):
@@ -24,38 +41,29 @@ def to_dict(packages):
     return d
 
 
-def compute_updates(installed, available):
-    updates = []
+def compute_package_ops(package_names, installed, available):
+    ops = []
+    missing = set()
+
     ad = to_dict(available)
+    installed_names = [p.name for p in installed]
+    not_installed = set(package_names) - set(installed_names)
+
+    for name in not_installed:
+        p = ad.get(name)
+        if p is None:
+            missing.add(name)
+        else:
+            ops.append(Install(p, p.revision))
+
     for i in installed:
-        a = ad.get(i.name)
-        if a is None:
-            print('   Update site is missing package \'{:s}\''.format(i.name), file=sys.stderr)
-            continue
-        if a.semver > i.semver:
-            updates.append(Update(i, a))
-    return updates
+        p = ad.get(i.name)
+        if p is None:
+            missing.add(i.name)
+        elif p.semver > i.semver:
+            ops.append(Update(p, i.revision, p.revision))
 
-
-def compute_requests(requested, available):
-    requests = []
-    ad = to_dict(available)
-    for r in requested:
-        a = ad.get(r)
-        if a is None:
-            print('    Update site is missing package \'{:s}\''.format(r), file=sys.stderr)
-            continue
-        requests.append(a)
-    return requests
-
-
-def remove_packages(packages, requested):
-    pd = to_dict(packages)
-    diff = set()
-    for r in requested:
-        if r not in pd:
-            diff.add(r)
-    return diff
+    return ops, missing
 
 
 def scan_missing(sdk, packages, verbose=False):
@@ -70,9 +78,10 @@ def scan_missing(sdk, packages, verbose=False):
     return missing
 
 
-def update_packages(android, package_filter, options=None, verbose=False, timeout=None):
+def install_packages(packages, android, options=None, verbose=False, timeout=None):
     if options is None:
         options = []
+    package_filter = ','.join([p.num for p in packages])
     args = ['update', 'sdk', '--no-ui', '--all', '--filter', package_filter] + options
     installer = pexpect.spawn(android, args=args, timeout=timeout)
     if verbose:
@@ -95,7 +104,7 @@ def update_packages(android, package_filter, options=None, verbose=False, timeou
             break
 
 
-def main(sdk, bootstrap=None, options=None, verbose=False, timeout=None, dry_run=False):
+def main(sdk, packages=None, options=None, verbose=False, timeout=None, dry_run=False):
     if timeout == 0:
         timeout = None
 
@@ -108,26 +117,18 @@ def main(sdk, bootstrap=None, options=None, verbose=False, timeout=None, dry_run
     installed = scan(sdk, verbose=verbose)
     print('   ', str(len(installed)), 'packages installed.')
 
-    # Remove package names we already have
-    requested = []
-    if bootstrap:
-        requested = remove_packages(installed, bootstrap)
-
     print('Querying update sites for available packages...')
     available = list_packages(android, options=options, verbose=verbose)
     print('   ', str(len(available)), 'packages available.')
 
-    requests = compute_requests(requested, available)
-    updates = compute_updates(installed, available)
+    ops, missing = compute_package_ops(packages, installed, available)
 
-    for r in requests:
-        print('Installing: {:s}'.format(str(r)))
-    for u in updates:
-        print('Updating:   {:s}'.format(str(u)))
+    if missing:
+        for name in missing:
+            print('Remote repository is missing package \'{:s}\''.format(name), file=sys.stderr)
+        exit(1)
 
-    to_install = set(requests + [u.available for u in updates])
-
-    if not to_install:
+    if not ops:
         print("All packages are up-to-date.")
         exit(0)
 
@@ -135,8 +136,12 @@ def main(sdk, bootstrap=None, options=None, verbose=False, timeout=None, dry_run
         print("--dry-run was set; exiting.")
         exit(0)
 
-    package_filter = ','.join([p.name for p in to_install])
-    update_packages(android, package_filter, options, verbose, timeout)
+    for op in ops:
+        print(op)
+
+    to_install = [op.package for op in ops]
+
+    install_packages(to_install, android, options, verbose, timeout)
 
     # Re-scan SDK dir for packages we missed.
     missing = scan_missing(sdk, to_install, verbose=verbose)

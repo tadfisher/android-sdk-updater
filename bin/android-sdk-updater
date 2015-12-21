@@ -55,7 +55,7 @@ def main():
 
     # Run the updater
     update_sdk.main(android_home,
-                    bootstrap=packages,
+                    packages=packages,
                     options=args.options,
                     verbose=args.verbose,
                     timeout=args.timeout,
