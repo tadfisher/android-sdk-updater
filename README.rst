@@ -75,7 +75,7 @@ Usage
 ::
 
     usage: android-sdk-updater [-h] [-v] [-a ANDROID_HOME] [-d] [-t TIMEOUT] [-vv]
-                               [-o ...]
+                               [-o ...] [-s {available,installed,updates}]
                                [package [package ...]]
 
     Update an Android SDK installation
@@ -97,7 +97,9 @@ Usage
       -vv, --verbose        show extra output from android tools
       -o ..., --options ...
                             options to pass to the "android" tool; must be the
-                            final argument specified
+                            final option specified
+      -s {available,installed,updates}, --show {available,installed,updates}
+                            Show available or installed packages
 
 Additional whitespace-delimited :code:`package` arguments can be piped to this tool over the standard input.
 
@@ -136,6 +138,14 @@ Update all packages in :code:`ANDROID_HOME` and ensure the installation of packa
 Same as the above, but through a proxy::
 
     $ cat packages.txt | android-sdk-updater -o --no-https --proxy-host example.com --proxy-port 3218
+
+Show installed packages, available packags, or packages with updates::
+
+    $ android-sdk-updater -s installed
+
+    $ android-sdk-updater -s available
+    
+    $ android-sdk-updater -s updates
 
 Caveats
 -------
