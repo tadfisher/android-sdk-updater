@@ -114,7 +114,7 @@ def parse_properties(file):
 
 def scan(top, verbose=False):
     packages = []
-    for root, subdirs, files in os.walk(top):
+    for root, subdirs, files in os.walk(top, followlinks=True):
         if 'source.properties' in files:
             del subdirs[:]
             package = parse(top, root)
