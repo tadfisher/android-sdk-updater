@@ -8,7 +8,50 @@ import sys
 
 from sdk_updater import __version__
 from sdk_updater import update as update_sdk
+from sdk_updater.scan import scan
+from sdk_updater.list import list_packages
+from sdk_updater.update import updates_available
 
+def show(android_home, args):
+    android = os.path.join(android_home, 'tools', 'android')
+
+    if args.show == "installed":
+        print("Installed packages:\n===================")
+        packages = scan(android_home, verbose=args.verbose)
+    elif args.show == "updates":
+        print("Available updates:\n===================")
+        ops, missing = updates_available(android,
+                                     android_home, 
+                                     packages=None, 
+                                     options=None, 
+                                     verbose=args.verbose)
+        packages = [op.package for op in ops]
+    else:
+        print("Available packages:\n===================")
+        packages = list_packages(android, 
+                                 options=args.options, 
+                                 verbose=args.verbose)
+
+    if packages is not None and packages:
+        names = [p.name for p in packages]
+        print("\n".join(names))
+    else:
+        print("No Packages")
+
+def default(android_home, args):
+    # Read packages from stdin
+    packages = list(args.package)
+    if not sys.stdin.isatty():
+        for line in sys.stdin:
+            packages.extend(line.split())
+
+    # Run the updater
+    update_sdk.main(android_home,
+                    packages=packages,
+                    options=args.options,
+                    verbose=args.verbose,
+                    timeout=args.timeout,
+                    dry_run=args.dry_run)
 
 def main():
     # Create our parser
@@ -31,6 +74,8 @@ def main():
                         help='options to pass to the "android" tool; must be the final option specified')
     parser.add_argument('package', nargs='*',
                         help='name of SDK package to install if not already installed')
+    parser.add_argument('-s', '--show', choices=['available', 'installed', 'updates'],
+                        help='Show available or installed packages')
 
     # Get our arguments
     args = parser.parse_args()
@@ -47,20 +92,11 @@ def main():
     if args.timeout < 0:
         parser.error('Timeout must be a positive number of seconds')
 
-    # Read packages from stdin
-    packages = list(args.package)
-    if not sys.stdin.isatty():
-        for line in sys.stdin:
-            packages.extend(line.split())
-
-    # Run the updater
-    update_sdk.main(android_home,
-                    packages=packages,
-                    options=args.options,
-                    verbose=args.verbose,
-                    timeout=args.timeout,
-                    dry_run=args.dry_run)
-
+    if args.show:
+        show(android_home, args)
+    else: # Default Action
+        default(android_home, args)
+        
 
 if __name__ == '__main__':
     try:

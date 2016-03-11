@@ -47,14 +47,16 @@ def compute_package_ops(package_names, installed, available):
 
     ad = to_dict(available)
     installed_names = [p.name for p in installed]
-    not_installed = set(package_names) - set(installed_names)
+    
+    if package_names is not None:
+        not_installed = set(package_names) - set(installed_names)
 
-    for name in not_installed:
-        p = ad.get(name)
-        if p is None:
-            missing.add(name)
-        else:
-            ops.append(Install(p, p.revision))
+        for name in not_installed:
+            p = ad.get(name)
+            if p is None:
+                missing.add(name)
+            else:
+                ops.append(Install(p, p.revision))
 
     for i in installed:
         p = ad.get(i.name)
@@ -103,6 +105,17 @@ def install_packages(packages, android, options=None, verbose=False, timeout=Non
         else:
             break
 
+def updates_available(android, sdk, packages=None, options=None, verbose=False):
+    print('Scanning', sdk, 'for installed packages...')
+    installed = scan(sdk, verbose=verbose)
+    print('   ', str(len(installed)), 'packages installed.')
+
+    print('Querying update sites for available packages...')
+    available = list_packages(android, options=options, verbose=verbose)
+    print('   ', str(len(available)), 'packages available.')
+
+    return compute_package_ops(packages, installed, available)
+
 
 def main(sdk, packages=None, options=None, verbose=False, timeout=None, dry_run=False):
     if timeout == 0:
@@ -113,15 +126,7 @@ def main(sdk, packages=None, options=None, verbose=False, timeout=None, dry_run=
         print('{:s} not found. Is ANDROID_HOME correct?'.format(android))
         exit(1)
 
-    print('Scanning', sdk, 'for installed packages...')
-    installed = scan(sdk, verbose=verbose)
-    print('   ', str(len(installed)), 'packages installed.')
-
-    print('Querying update sites for available packages...')
-    available = list_packages(android, options=options, verbose=verbose)
-    print('   ', str(len(available)), 'packages available.')
-
-    ops, missing = compute_package_ops(packages, installed, available)
+    ops, missing = updates_available(android, sdk, packages, options, verbose)
 
     if missing:
         for name in missing:
