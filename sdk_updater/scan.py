@@ -55,8 +55,6 @@ def system_images(props, parts):
     tag = props['tag']
     if tag == 'default':
         tag = 'android'
-    if tag == 'google_apis':
-        tag = 'addon-google_apis-google'
     return '-'.join(['sys-img', props['abi'], tag, props['api']])
 
 
