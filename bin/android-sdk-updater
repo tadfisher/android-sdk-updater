@@ -16,10 +16,8 @@ def show(android_home, args):
     android = os.path.join(android_home, 'tools', 'android')
 
     if args.show == "installed":
-        print("Installed packages:\n===================")
         packages = scan(android_home, verbose=args.verbose)
     elif args.show == "updates":
-        print("Available updates:\n===================")
         ops, missing = updates_available(android,
                                      android_home, 
                                      packages=None, 
@@ -27,8 +25,7 @@ def show(android_home, args):
                                      verbose=args.verbose)
         packages = [op.package for op in ops]
     else:
-        print("Available packages:\n===================")
-        packages = list_packages(android, 
+        packages = list_packages(android,
                                  options=args.options, 
                                  verbose=args.verbose)
 
