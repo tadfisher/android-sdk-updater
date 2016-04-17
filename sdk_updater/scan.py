@@ -13,7 +13,8 @@ from sdk_updater.package import Package
 
 # TODO: Support NDK installs
 blacklist = [
-    'ndk-bundle'
+    'ndk-bundle',
+    'temp'
 ]
 
 
@@ -67,11 +68,12 @@ def default(props, parts):
 def parse(top, root):
     path = os.path.relpath(root, top)
 
-    if path in blacklist:
+    parts = path.split(os.path.sep)
+
+    if parts[0] in blacklist:
         print('Ignoring \'{:s}\' as it is blacklisted.'.format(path))
         return None
 
-    parts = path.split(os.path.sep)
     props = parse_properties(os.path.join(root, 'source.properties'))
     name = {
         'add-ons': add_ons,
