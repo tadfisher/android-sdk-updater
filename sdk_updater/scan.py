@@ -38,8 +38,6 @@ def platforms(props, parts):
 
 
 def platform_tools(props, parts):
-    if props['license'] == 'android-sdk-preview-license':
-        return parts[0] + '-preview'
     return parts[0]
 
 
