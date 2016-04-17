@@ -12,6 +12,7 @@ from sdk_updater.scan import scan
 from sdk_updater.list import list_packages
 from sdk_updater.update import updates_available
 
+
 def show(android_home, args):
     android = os.path.join(android_home, 'tools', 'android')
 
@@ -19,21 +20,21 @@ def show(android_home, args):
         packages = scan(android_home, verbose=args.verbose)
     elif args.show == "updates":
         ops, missing = updates_available(android,
-                                     android_home, 
-                                     packages=None, 
-                                     options=None, 
-                                     verbose=args.verbose)
+                                         android_home,
+                                         packages=None,
+                                         options=None,
+                                         verbose=args.verbose)
         packages = [op.package for op in ops]
-    else:
+    elif args.show == "available":
         packages = list_packages(android,
                                  options=args.options, 
                                  verbose=args.verbose)
+    else:
+        raise NotImplementedError("Unknown argument '{}'".format(args.show))
 
     if packages is not None and packages:
-        names = [p.name for p in packages]
-        print("\n".join(names))
-    else:
-        print("No Packages")
+        print('\n'.join([str(p) for p in packages]))
+
 
 def default(android_home, args):
     # Read packages from stdin
@@ -49,6 +50,7 @@ def default(android_home, args):
                     verbose=args.verbose,
                     timeout=args.timeout,
                     dry_run=args.dry_run)
+
 
 def main():
     # Create our parser
@@ -91,7 +93,7 @@ def main():
 
     if args.show:
         show(android_home, args)
-    else: # Default Action
+    else:
         default(android_home, args)
         
 
