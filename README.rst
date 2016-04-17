@@ -162,8 +162,8 @@ License
 
 ::
 
-    Copyright 2015 Tad Fisher
-    Copyright 2015 Tristan Waddington
+    Copyright 2016 Tad Fisher
+    Copyright 2016 Tristan Waddington
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
