@@ -3,6 +3,18 @@
 Change Log
 ----------
 
+0.0.4 (2016-07-24)
+++++++++++++++++++
+
+**Bugfixes**
+
+- Display a warning for missing remote packages instead of exiting fatally.
+- Exit fatally when the remote is missing explicitly-requested packages.
+- Standardize error messaging:
+  - Prepend "WARNING:" for non-fatal messages
+  - Prepend "FATAL:" for fatal messages
+
+
 0.0.3 (2016-04-16)
 ++++++++++++++++++
 
@@ -26,6 +38,7 @@ Change Log
 - Handle Unicode strings properly for Python 2.
 - Blacklist the NDK package. Plans are in place to support this in a future release.
 - Use non-zero exit code when installation of one or more packages fail.
+
 
 0.0.1 (2015-11-27)
 ++++++++++++++++++

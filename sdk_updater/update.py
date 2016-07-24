@@ -72,12 +72,7 @@ def scan_missing(sdk, packages, verbose=False):
     # Re-scan SDK root to check for failed installs.
     print('Re-scanning {:s}...'.format(sdk))
     installed = scan(sdk, verbose=verbose)
-    missing = [p for p in packages if p not in installed]
-    if missing:
-        print('Failed to install packages:', file=sys.stderr)
-        for m in missing:
-            print('   ', m, file=sys.stderr)
-    return missing
+    return [p for p in packages if p not in installed]
 
 
 def install_packages(packages, android, options=None, verbose=False, timeout=None):
@@ -99,7 +94,7 @@ def install_packages(packages, android, options=None, verbose=False, timeout=Non
             installer.sendline('y')
         elif i == 1:
             # Timeout
-            print('Package installation timed out after {:d} seconds.'
+            print('WARNING: Package installation timed out after {:d} seconds.'
                   .format(timeout), file=sys.stderr)
             break
         else:
@@ -126,12 +121,19 @@ def main(sdk, packages=None, options=None, verbose=False, timeout=None, dry_run=
         print('{:s} not found. Is ANDROID_HOME correct?'.format(android))
         exit(1)
 
-    ops, missing = updates_available(android, sdk, packages, options, verbose)
+    ops, missing_remote = updates_available(android, sdk, packages, options, verbose)
 
-    if missing:
-        for name in missing:
-            print('Remote repository is missing package \'{:s}\''.format(name), file=sys.stderr)
-        exit(1)
+    if missing_remote:
+        print('WARNING: Remote repository is missing package(s):', file=sys.stderr)
+        for name in missing_remote:
+            print('    ', name, file=sys.stderr)
+        if packages:
+            missing_requested = set(missing_remote).intersection(set(packages))
+            if missing_requested:
+                print('FATAL: Remote repository is missing explicitly requested package(s):', file=sys.stderr)
+                for p in missing_requested:
+                    print('    ', p, file=sys.stderr)
+                exit(1)
 
     if not ops:
         print("All packages are up-to-date.")
@@ -152,8 +154,10 @@ def main(sdk, packages=None, options=None, verbose=False, timeout=None, dry_run=
     missing = scan_missing(sdk, to_install, verbose=verbose)
 
     if missing:
-        print('Finished: {:d} packages installed. Failed to install {:d} packages.'
-              .format(len(to_install) - len(missing), len(missing)))
+        print('FATAL: Finished: {:d} packages installed. Failed to install {:d} package(s):'
+              .format(len(to_install) - len(missing), len(missing)), file=sys.stderr)
+        for p in missing:
+            print('    ', p, file=sys.stderr)
         exit(1)
     else:
         print('Finished: {:d} packages installed.'.format(len(to_install)))
