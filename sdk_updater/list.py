@@ -47,12 +47,12 @@ def list_packages(android, options=None, verbose=False):
     for field in fields:
         m = p_id.search(field)
         if m is None:
-            print("Failed to parse package ID:", field, file=sys.stderr)
+            print("WARNING: Failed to parse package ID:", field, file=sys.stderr)
             continue
         num, name = m.groups()
         m = p_revision.search(field)
         if m is None:
-            print("Failed to parse revision:", field, file=sys.stderr)
+            print("WARNING: Failed to parse revision:", field, file=sys.stderr)
             continue
         revision, = m.groups()
         revision = revision.replace(' (Obsolete)', '')
@@ -60,12 +60,12 @@ def list_packages(android, options=None, verbose=False):
 
         m = p_type.search(field)
         if m is None:
-            print('Failed to parse type:', field, file=sys.stderr)
+            print('WARNING: Failed to parse type:', field, file=sys.stderr)
             continue
         ptype, = m.groups()
         category = categories[ptype]
         if category is None:
-            print('Unrecognized type:', ptype, file=sys.stderr)
+            print('WARNING: Unrecognized type:', ptype, file=sys.stderr)
             category = ptype.lower()
         packages.append(Package(category, name, revision, semver, num))
     return packages

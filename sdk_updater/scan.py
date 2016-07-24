@@ -71,7 +71,7 @@ def parse(top, root):
     parts = path.split(os.path.sep)
 
     if parts[0] in blacklist:
-        print('Ignoring \'{:s}\' as it is blacklisted.'.format(path))
+        print('WARNING: Ignoring \'{:s}\' as it is blacklisted.'.format(path), file=sys.stderr)
         return None
 
     props = parse_properties(os.path.join(root, 'source.properties'))
@@ -88,7 +88,7 @@ def parse(top, root):
         'tools': tools
     }.get(parts[0], default)(props, parts)
     if not name:
-        print("Package parse failed:", path, file=sys.stderr)
+        print("WARNING: Failed to parse package:", path, file=sys.stderr)
         return None
     return Package(parts[0], name, props['revision'], Version.coerce(props['revision']))
 
