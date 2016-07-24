@@ -126,12 +126,19 @@ def main(sdk, packages=None, options=None, verbose=False, timeout=None, dry_run=
         print('{:s} not found. Is ANDROID_HOME correct?'.format(android))
         exit(1)
 
-    ops, missing = updates_available(android, sdk, packages, options, verbose)
+    ops, missing_remote = updates_available(android, sdk, packages, options, verbose)
 
-    if missing:
-        for name in missing:
-            print('Remote repository is missing package \'{:s}\''.format(name), file=sys.stderr)
-        exit(1)
+    if missing_remote:
+        print('WARNING: Remote repository is missing package(s):', file=sys.stderr)
+        for name in missing_remote:
+            print('    ', name, file=sys.stderr)
+        if packages:
+            missing_requested = set(missing_remote).intersection(set(packages))
+            if missing_requested:
+                print('FATAL: Remote repository is missing explicitly requested package(s):', file=sys.stderr)
+                for p in missing_requested:
+                    print('    ', p, file=sys.stderr)
+                exit(1)
 
     if not ops:
         print("All packages are up-to-date.")
