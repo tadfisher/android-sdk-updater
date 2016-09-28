@@ -1,3 +1,10 @@
+DEPRECATED
+==========
+
+This project will no longer be maintained. Version 2.2 of the Android Gradle
+plugin automatically downloads Android tools and SDK dependencies, which
+obviates the rationale for this project.
+
 android-sdk-updater
 ===================
 
@@ -144,7 +151,7 @@ Show installed packages, available packags, or packages with updates::
     $ android-sdk-updater -s installed
 
     $ android-sdk-updater -s available
-    
+
     $ android-sdk-updater -s updates
 
 Caveats
